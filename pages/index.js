@@ -12,8 +12,12 @@ export default function Home() {
   // Carga voces y tema oscuro guardado
   useEffect(() => {
     const loadVoices = () => {
-      const allVoices = speechSynthesis.getVoices();
-      setVoices(allVoices);
+      
+const allVoices = speechSynthesis.getVoices();
+const spanishVoices = allVoices.filter((v) => v.lang.toLowerCase().startsWith("es"));
+setVoices(spanishVoices);
+
+
       setSelectedVoice((prev) =>
         prev ? allVoices.find((v) => v.name === prev.name) || allVoices[0] : allVoices[0]
       );
