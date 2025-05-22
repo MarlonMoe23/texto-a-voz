@@ -4,38 +4,24 @@ export default function Home() {
   const [text, setText] = useState("");
   const [voices, setVoices] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState(null);
-  const [isDark, setIsDark] = useState(false);
   const [readingIndex, setReadingIndex] = useState(0);
   const utteranceRef = useRef(null);
   const textareaRef = useRef(null);
 
-  // Carga voces y tema oscuro guardado
+  // Cargar solo voces en español
   useEffect(() => {
     const loadVoices = () => {
-      
-const allVoices = speechSynthesis.getVoices();
-const spanishVoices = allVoices.filter((v) => v.lang.toLowerCase().startsWith("es"));
-setVoices(spanishVoices);
-
-
+      const allVoices = speechSynthesis.getVoices();
+      const spanishVoices = allVoices.filter((v) => v.lang.startsWith("es"));
+      setVoices(spanishVoices);
       setSelectedVoice((prev) =>
-        prev ? allVoices.find((v) => v.name === prev.name) || allVoices[0] : allVoices[0]
+        prev ? spanishVoices.find((v) => v.name === prev.name) || spanishVoices[0] : spanishVoices[0]
       );
     };
     speechSynthesis.onvoiceschanged = loadVoices;
     loadVoices();
-
-    // Carga tema oscuro desde localStorage
-    const savedTheme = localStorage.getItem("tts-dark-theme");
-    if (savedTheme) setIsDark(savedTheme === "true");
   }, []);
 
-  // Guardar tema oscuro en localStorage cuando cambia
-  useEffect(() => {
-    localStorage.setItem("tts-dark-theme", isDark.toString());
-  }, [isDark]);
-
-  // Función para hablar desde readingIndex
   const speakText = () => {
     if (!text.trim()) {
       alert("Por favor escribe o pega algún texto.");
@@ -45,7 +31,6 @@ setVoices(spanishVoices);
       speechSynthesis.cancel();
     }
 
-    // Ajustamos el texto desde readingIndex
     const textToSpeak = text.slice(readingIndex);
 
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
@@ -55,7 +40,6 @@ setVoices(spanishVoices);
 
     utteranceRef.current = utterance;
 
-    // Cuando termine, reseteamos readingIndex
     utterance.onend = () => {
       setReadingIndex(0);
     };
@@ -63,24 +47,18 @@ setVoices(spanishVoices);
     speechSynthesis.speak(utterance);
   };
 
-  // Detener la lectura
   const stopSpeaking = () => {
     speechSynthesis.cancel();
     setReadingIndex(0);
   };
 
-  // Cambio tema oscuro/claro
-  const toggleTheme = () => setIsDark((v) => !v);
-
-  // Actualizar readingIndex cuando usuario mueve cursor
   const handleCursorChange = (e) => {
     setReadingIndex(e.target.selectionStart);
   };
 
-  // Estilos
   const themeStyles = {
-    backgroundColor: isDark ? "#121212" : "#f9f9f9",
-    color: isDark ? "#eee" : "#111",
+    backgroundColor: "#121212",
+    color: "#eee",
     minHeight: "100vh",
     padding: "1.5rem",
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -94,11 +72,11 @@ setVoices(spanishVoices);
     height: "150px",
     padding: "1rem",
     fontSize: "1rem",
-    border: `1px solid ${isDark ? "#444" : "#ccc"}`,
+    border: "1px solid #444",
     borderRadius: "5px",
     resize: "vertical",
-    backgroundColor: isDark ? "#1e1e1e" : "#fff",
-    color: isDark ? "#eee" : "#111",
+    backgroundColor: "#1e1e1e",
+    color: "#eee",
     boxSizing: "border-box",
   };
 
@@ -107,9 +85,9 @@ setVoices(spanishVoices);
     padding: "0.5rem",
     fontSize: "1rem",
     marginBottom: "1rem",
-    backgroundColor: isDark ? "#1e1e1e" : "#fff",
-    color: isDark ? "#eee" : "#111",
-    border: `1px solid ${isDark ? "#444" : "#ccc"}`,
+    backgroundColor: "#1e1e1e",
+    color: "#eee",
+    border: "1px solid #444",
     borderRadius: "5px",
   };
 
@@ -120,14 +98,9 @@ setVoices(spanishVoices);
     marginRight: "0.75rem",
     borderRadius: "6px",
     border: "none",
-    backgroundColor: isDark ? "#0070f3" : "#0070f3",
+    backgroundColor: "#0070f3",
     color: "#fff",
     transition: "background-color 0.2s",
-  };
-
-  // Responsive para celulares
-  const responsiveContainer = {
-    padding: "1rem",
   };
 
   return (
@@ -135,15 +108,6 @@ setVoices(spanishVoices);
       <h1 style={{ marginBottom: "1rem", textAlign: "center" }}>
         Texto a Voz (TTS)
       </h1>
-
-      <button
-        title={isDark ? "Cambiar a tema claro" : "Cambiar a tema oscuro"}
-        onClick={toggleTheme}
-        style={iconButton}
-        aria-label="Cambiar tema"
-      >
-        {isDark ? "☀️" : "🌙"}
-      </button>
 
       <div style={{ margin: "1rem 0" }}>
         <label htmlFor="voiceSelect" style={{ display: "block", marginBottom: "0.4rem" }}>
